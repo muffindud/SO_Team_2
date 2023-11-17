@@ -3,133 +3,149 @@
 ; nasm -f bin -o lab3.img lab3.asm
 ; trucate lab3.img -S 1474560
 
-; ECHO keyboard input
-; Support for enter and backspace
-org 0x7C00          ; BIOS loads boot sector to 0x7C00
+; BIOS loads boot sector to 0x7C00
+org 0x7C00
 
-start:
-    mov sp, 0x7C00  ; Set stack pointer to 0x7C00
-    mov si, buffer  ; Set source index to buffer
+; Set source index to buffer
+mov si, buffer  
 
 main:
-    mov ah, 00h     ; Call read next keystroke
-    int 16h         ; Call BIOS keyboard I/O
+    ; Call BIOS keyboard input
+    mov ah, 00h
+    int 16h
 
-    cmp ah, 0x0E    ; Check backspace
+    ; Check backspace
+    cmp ah, 0x0E
     je escape_backspace
 
-    cmp ah, 0x1C    ; Check enter
+    ; Check enter
+    cmp ah, 0x1C
     je escape_enter
 
-    cmp si, buffer + 256    ; Check if buffer is full
-    je main        ; Jump to write
+    ; Check if buffer is full
+    cmp si, buffer + 256
+    je main
 
-    ; TODO: Check if character is printable
+    ; Check if character is printable
+    cmp al, 0x20
+    jl main
+    cmp al, 0x7E
+    jg main
+
     ; TODO: Add scroll support
 
-    mov [si], al    ; Store character in buffer
-    inc si          ; Increment source index
+    ; Store character in buffer
+    mov [si], al
+    inc si
 
-    mov ah, 0Eh     ; Call write character
-    int 10h         ; Call BIOS video services
+    ; Call write character
+    mov ah, 0Eh     
+    int 10h
 
-    jmp main        ; Jump to main
+    ; Loop to main  
+    jmp main
 
 escape_backspace:
-    mov ah, 03h     ; Call get cursor position
-    int 10h         ; Call BIOS video services
+    ; Call BIOS get cursor
+    mov ah, 03h
+    int 10h
 
-    cmp si, buffer  ; Check if buffer is empty
-    je main         ; Jump to main
+    ; Check if buffer is empty
+    cmp si, buffer
+    je main
     
-    dec si          ; Decrement source index
-    mov byte [si], 0x00 ; Replace last character with 0x00
+    ; Move si back and delete last char in buffer
+    sub si, 1
+    mov byte [si], 0x00
 
-    cmp dl, 0x00    ; Check if cursor is on the first column
+    ; Check if cursor is on the first column
+    cmp dl, 0x00
     jz new_line_backspace
 
-    mov ah, 02h     ; Call set cursor position
-    dec dl          ; Move cursor left one column
-    int 10h         ; Call BIOS video services
+    ; Move cursor back one column
+    mov ah, 02h
+    sub dl, 0x01
+    int 10h
 
-    mov ah, 0Ah     ; Call write character
-    mov al, 0x00    ; Replace last character on screen with 0x00
-    int 10h         ; Call BIOS video services
+    ; Delete last character on screen
+    mov ah, 0Ah
+    mov al, 0x00
+    int 10h
 
-    jmp main        ; Jump to main
+    jmp main
 
 new_line_backspace:
-    mov ah, 03h     ; Call get cursor position
-    int 10h         ; Call BIOS video services
+    ; Call BIOS get cursor
+    mov ah, 03h
+    int 10h
 
-    cmp dh, 0x00    ; Check if cursor is on the first line
-    je main         ; Jump to main
+    ; Check if cursor is on the first line
+    cmp dh, 0x00
+    je main
 
-    ; dec si          ; Decrement source index
-    ; mov byte [si], 0x00 ; Replace last character with 0x00
+    ; Move cursor to the end of the previous line
+    mov ah, 02h
+    mov dl, 0x4F
+    sub dh, 0x01
+    int 10h
 
-    mov ah, 02h     ; Call set cursor position
-    mov dl, 0x4F    ; Move cursor to the end of the line
-    dec dh          ; Move cursor up one line
-    int 10h         ; Call BIOS video services
+    ; Delete last character on screen
+    mov ah, 0Ah
+    mov al, 0x00
+    int 10h
 
-    mov ah, 0Ah     ; Call write character
-    mov al, 0x00    ; Replace last character on screen with 0x00
-    int 10h         ; Call BIOS video services
-
-    jmp main        ; Jump to main
+    jmp main
 
 escape_enter:
-    mov ah, 03h     ; Call get cursor position
-    int 10h         ; Call BIOS video services
+    ; Call BIOS get cursor
+    mov ah, 03h
+    int 10h
 
-    sub si, buffer  ; Get length of buffer
+    ; Check if buffer is empty
+    sub si, buffer
     jz empty_enter
 
     ; TODO: Compare for prompt
 
+    ; Print buffer after new line
+    mov ax, 1301h
+    mov bl, 07h
+    mov bp, buffer
+    mov cx, si
+    mov dl, 0x00
+    add dh, 0x02
+    int 10h
+
+    ; Palce cursor at the beginning of the next line
     mov ah, 02h
     mov dl, 0x00
-    inc dh
+    add dh, 0x01
     int 10h
 
-    mov ax, 1301h   ; Call write string
-    mov bl, 07h     ; Set text attribute
-    mov bp, buffer  ; Set buffer pointer
-    mov cx, si      ; Set length of buffer
-    mov dl, 0x00    ; Move cursor to the beginning of the line
-    inc dh          ; Move cursor down one line
-    int 10h
-
-    mov ah, 03h     ; Call get cursor position
-    int 10h         ; Call BIOS video services
-
-    mov ah, 02h     ; Call set cursor position
-    mov dl, 0x00    ; Move cursor to the beginning of the line
-    inc dh          ; Move cursor down one line
-    int 10h         ; Call BIOS video services
-
-    add si, buffer  ; Reset source index
-    
-    jmp clear_buffer
+    ; Set si to the beginning of the buffer
+    add si, buffer
 
 clear_buffer:
-    mov byte [si], 0x00 ; Reset buffer
-    inc si
+    ; Delete the current character in buffer
+    mov byte [si], 0x00
+    add si, 0x01
     cmp si, 0x00
     jne clear_buffer
 
-    mov si, buffer  ; Reset source index
+    ; Reset si to the beginning of the buffer
+    mov si, buffer
 
     jmp main
 
 empty_enter:
-    mov ah, 02h     ; Call set cursor position
-    mov dl, 0x00    ; Move cursor to the beginning of the line
-    inc dh          ; Move cursor down one line
-    int 10h         ; Call BIOS video services
+    ; Place cursor at the beginning of the next line
+    mov ah, 02h
+    mov dl, 0x00
+    add dh, 0x01
+    int 10h
 
-    add si, buffer  ; Reset source index
+    ; Reset source index
+    add si, buffer  
 
     jmp clear_buffer
 
