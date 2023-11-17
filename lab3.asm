@@ -12,6 +12,7 @@ mov si, buffer
 main:
     ; Call BIOS keyboard input
     mov ah, 00h
+    mov bh, 0x00
     int 16h
 
     ; Check backspace
@@ -26,20 +27,26 @@ main:
     cmp si, buffer + 256
     je main
 
+    ; TODO: Add scroll support
+    cmp ah, 0x48
+    je scroll_up
+
+    cmp ah, 0x50
+    je scroll_down
+
     ; Check if character is printable
     cmp al, 0x20
     jl main
     cmp al, 0x7E
     jg main
 
-    ; TODO: Add scroll support
-
     ; Store character in buffer
     mov [si], al
     inc si
 
     ; Call write character
-    mov ah, 0Eh     
+    mov ah, 0Eh 
+    mov bh, 0x00    
     int 10h
 
     ; Loop to main  
@@ -48,6 +55,7 @@ main:
 escape_backspace:
     ; Call BIOS get cursor
     mov ah, 03h
+    mov bh, 0x00
     int 10h
 
     ; Check if buffer is empty
@@ -64,11 +72,13 @@ escape_backspace:
 
     ; Move cursor back one column
     mov ah, 02h
+    mov bh, 0x00
     sub dl, 0x01
     int 10h
 
     ; Delete last character on screen
     mov ah, 0Ah
+    mov bh, 0x00
     mov al, 0x00
     int 10h
 
@@ -77,6 +87,7 @@ escape_backspace:
 new_line_backspace:
     ; Call BIOS get cursor
     mov ah, 03h
+    mov bh, 0x00
     int 10h
 
     ; Check if cursor is on the first line
@@ -85,12 +96,14 @@ new_line_backspace:
 
     ; Move cursor to the end of the previous line
     mov ah, 02h
+    mov bh, 0x00
     mov dl, 0x4F
     sub dh, 0x01
     int 10h
 
     ; Delete last character on screen
     mov ah, 0Ah
+    mov bh, 0x00
     mov al, 0x00
     int 10h
 
@@ -99,6 +112,7 @@ new_line_backspace:
 escape_enter:
     ; Call BIOS get cursor
     mov ah, 03h
+    mov bh, 0x00
     int 10h
 
     ; Check if buffer is empty
@@ -109,6 +123,7 @@ escape_enter:
 
     ; Print buffer after new line
     mov ax, 1301h
+    mov bh, 0x00
     mov bl, 07h
     mov bp, buffer
     mov cx, si
@@ -116,10 +131,14 @@ escape_enter:
     add dh, 0x02
     int 10h
 
-    ; Palce cursor at the beginning of the next line
-    mov ah, 02h
-    mov dl, 0x00
-    add dh, 0x01
+    mov ah, 03h
+    int 10h
+
+    mov ax, 1301h
+    mov bh, 0x00
+    mov bl, 07h
+    mov bp, new_line
+    mov cx, new_line_len
     int 10h
 
     ; Set si to the beginning of the buffer
@@ -140,6 +159,7 @@ clear_buffer:
 empty_enter:
     ; Place cursor at the beginning of the next line
     mov ah, 02h
+    mov bh, 0x00
     mov dl, 0x00
     add dh, 0x01
     int 10h
@@ -149,6 +169,51 @@ empty_enter:
 
     jmp clear_buffer
 
+scroll_up:
+    mov ah, 03h
+    mov bh, 0x00
+    int 10h
+
+    cmp dh, 0x14
+    je main
+
+    mov ah, 02h
+    mov bh, 0x00
+    sub dh, 0x01
+    int 10h
+
+    ; Call BIOS scroll up
+    mov ah, 06h
+    mov bh, 0x07
+    mov cx, 0x00
+    mov dx, 0x184F
+    mov al, 0x01
+    int 10h
+
+    jmp main
+
+scroll_down:
+    mov ah, 03h
+    mov bh, 0x00
+    int 10h
+
+    cmp dh, 0x00
+    je main
+
+    mov ah, 02h
+    mov bh, 0x00
+    add dh, 0x01
+    int 10h
+
+    ; Call BIOS scroll down
+    mov ah, 07h
+    mov bh, 0x07
+    mov cx, 0x00
+    mov dx, 0x184F
+    mov al, 0x01
+    int 10h
+
+    jmp main
 
 section .data
     n_prompt db "N: ", 0
@@ -162,5 +227,8 @@ section .data
 
     sector_prompt db "Sector: ", 0
     sector_len equ $ - sector_prompt
+
+    new_line db 0x0D, 0x0A
+    new_line_len equ $ - new_line
 
 buffer: times 256 db 0x00
