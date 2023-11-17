@@ -26,7 +26,7 @@ main:
     cmp si, buffer + 256
     je main
 
-    ; TODO: Add scroll support
+    ; Check arrow-up
     cmp ah, 0x48
     je scroll_up_one
 
@@ -140,6 +140,9 @@ clear_buffer:
     ; Reset si to the beginning of the buffer
     mov si, buffer
 
+    cmp dh, 0x15
+    jg scroll_up_four
+
     jmp main
 
 empty_enter:
@@ -154,6 +157,11 @@ empty_enter:
 
     jmp clear_buffer
 
+
+scroll_up_four:
+    mov al, 0x04
+    jmp scroll_up
+
 scroll_up_one:
     mov al, 0x01
 
@@ -166,9 +174,9 @@ scroll_up:
     cmp dh, 0x03
     jl main
 
-    ; Move cursor up one line
+    ; Move cursor one line
     mov ah, 02h
-    sub dh, 0x01
+    sub dh, al
     int 10h
 
     ; Call BIOS scroll up
