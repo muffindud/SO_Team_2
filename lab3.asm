@@ -6,8 +6,121 @@
 ; BIOS loads boot sector to 0x7C00
 org 0x7C00
 
+start:
+    ; mov ah, 03h
+    ; mov al, 0x01
+    ; mov bx, sector_1
+    ; mov cl, sector_1_cl
+    ; mov dh, sector_1_dh
+    ; mov ch, sector_1_ch
+    ; int 13h
+
+    ; Copy sector 1 to buffer
+    mov cx, sector_1_len
+    mov di, disk_sector
+    mov si, sector_1
+    cld
+    rep movsb
+    mov ah, 0x0
+    copy_sector1:
+        mov cx, sector_1_len
+        mov si, sector_1
+        cld
+        rep movsb
+
+        inc ah
+        cmp ah, 0x9
+        jne copy_sector1
+
+    write_sector1:
+        mov ah, 03h
+        mov al, 0x01
+        mov bx, disk_sector
+        mov cl, sector_1_cl
+        mov dh, sector_1_dh
+        mov ch, sector_1_ch
+        int 13h
+
+    mov di, disk_sector
+    clear_buffer_1:
+        ; Delete the current character in disk buffer
+        mov byte [di], 0x00
+        add di, 0x01
+        cmp di, 0x00
+        jne clear_buffer_1
+
+        ; Reset si to the beginning of the disk buffer
+        mov di, disk_sector
+
+    ; Copy sector 2 to buffer
+    mov cx, sector_2_len
+    mov di, disk_sector
+    mov si, sector_2
+    cld
+    rep movsb
+    mov ah, 0x0
+    copy_sector2:
+        mov cx, sector_2_len
+        mov si, sector_2
+        cld
+        rep movsb
+
+        inc ah
+        cmp ah, 0x9
+        jne copy_sector2
+
+    write_sector2:
+        mov ah, 03h
+        mov al, 0x01
+        mov bx, disk_sector
+        mov cl, sector_2_cl
+        mov dh, sector_2_dh
+        mov ch, sector_2_ch
+        int 13h
+    
+    mov di, disk_sector
+    clear_buffer_2:
+        ; Delete the current character in disk buffer
+        mov byte [di], 0x00
+        add di, 0x01
+        cmp di, 0x00
+        jne clear_buffer_2
+
+        ; Reset si to the beginning of the disk buffer
+        mov di, disk_sector
+    
+    ; Copy sector 3 to buffer
+    mov cx, sector_3_len
+    mov di, disk_sector
+    mov si, sector_3
+    cld
+    rep movsb
+    mov ah, 0x0
+    copy_sector3:
+        ; add di, sector_1_len
+        mov cx, sector_3_len
+        mov si, sector_3
+        cld
+        rep movsb
+
+        inc ah
+        cmp ah, 0x9
+        jne copy_sector3
+
+    write_sector3:
+        mov ah, 03h
+        mov al, 0x01
+        mov bx, disk_sector
+        mov cl, sector_3_cl
+        mov dh, sector_3_dh
+        mov ch, sector_3_ch
+        int 13h
+
+    jmp $
+
 ; Set source index to buffer
-mov si, buffer  
+mov si, buffer
+
 
 main:
     ; Call BIOS keyboard input
@@ -191,6 +304,28 @@ scroll_up:
     jmp main
 
 section .data
+    sector_1 db "@@@FAF-213 Corneliu Catlabuga###"
+    sector_1_len equ $ - sector_1
+    sector_1_ch equ 0x38
+    sector_1_dh equ 0x1
+    sector_1_cl equ 0x8
+    ;0xFF000 + 0x200
+    
+
+    sector_2 db "@@@FAF-213 Beatricia Golban###"
+    sector_2_len equ $ - sector_2
+    sector_2_ch equ 0x3F
+    sector_2_dh equ 0x0
+    sector_2_cl equ 0xE
+    ; 0x11D000 + 0x200
+
+    sector_3 db "@@@FAF-213 Gabriel Gitlan###"
+    sector_3_len equ $ - sector_3
+    sector_3_ch equ 0x40
+    sector_3_dh equ 0x0
+    sector_3_cl equ 0x8
+    ; 0x120C00 + 0x200
+
     n_prompt db "N: ", 0
     n_len equ $ - n_prompt
 
@@ -207,3 +342,4 @@ section .data
     new_line_len equ $ - new_line
 
 buffer: times 256 db 0x00
+disk_sector: times 512 db 0x00
