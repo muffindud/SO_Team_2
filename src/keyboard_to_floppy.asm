@@ -1,110 +1,3 @@
-start:
-    ; Write sector 1
-    ; to 2041
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x38
-    mov dh, 0x1
-    mov cl, 0x8
-    mov bx, sector_1
-    int 13h
-
-    ; to 2070
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x39
-    mov dh, 0x1
-    mov cl, 0x1
-    mov bx, sector_1
-    int 13h
-
-    ; Write sector 2
-    ; to 2281
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x3F
-    mov dh, 0x0
-    mov cl, 0xE
-    mov bx, sector_2
-    int 13h
-
-    ; to 2310
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x40
-    mov dh, 0x0
-    mov cl, 0x7
-    mov bx, sector_2
-    int 13h
-
-    ; Write sector 3
-    ; to 2311
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x40
-    mov dh, 0x0
-    mov cl, 0x8
-    mov bx, sector_3
-    int 13h
-
-    ; to 2340
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x41
-    mov dh, 0x0
-    mov cl, 0x1
-    mov bx, sector_3
-    int 13h
-
-menu:
-    call clear_screen
-
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, main_message
-    mov cx, main_message_size
-    mov dl, 0x0
-    mov dh, 0x0
-    int 10h
-
-    mov ah, 00h
-    int 16h
-
-    cmp al, '1'
-    je keyboard_to_floppy
-
-    cmp al, '2'
-    je floppy_to_ram
-
-    cmp al, '3'
-    je ram_to_floppy
-
-    jmp unexpected_option
-
-    jmp $
-
-unexpected_option:
-    call clear_screen
-
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, unexpected_option_message
-    mov cx, unexpected_option_message_size
-    mov dl, 0x0
-    mov dh, 0x0
-    int 10h
-
-    mov ah, 00h
-    int 16h
-
-    jmp menu
-
 keyboard_to_floppy:
     ; Clear the screen
     call clear_screen
@@ -173,6 +66,7 @@ ktf_input_done:
     add dh, 0x2
     int 10h
 
+    ; Prompt the user for side
     mov ax, 1301h
     mov bx, 0x7
     mov bp, side_prompt
@@ -195,7 +89,8 @@ ktf_input_done:
 
         sub al, 0x30
         mov [side], al
-         
+    
+    ; Prompt the user for track
     mov ax, 1301h
     mov bx, 0x7
     mov bp, track_prompt
@@ -259,6 +154,7 @@ ktf_input_done:
 
             jmp get_sector_prompt
     
+    ; Prompt the user for sector
     get_sector_prompt:
         mov ax, 1301h
         mov bx, 0x7
@@ -326,6 +222,7 @@ ktf_input_done:
 write_to_floppy:
     ; TODO: Add the times functionality
 
+    ; Write to floppy
     mov ah, 03h
     mov dl, 0x0
     mov al, 0x1
@@ -379,37 +276,6 @@ ktf_bakcspace_no_newline:
 
     jmp ktf_input
 
-floppy_to_ram:
-        
-    jmp menu
-
-ram_to_floppy:
-        
-    jmp menu
-
-clear_screen:
-    mov ah, 07h
-    mov al, 0x0
-    mov bh, 0x7
-    mov cx, 0x0
-    mov dx, 0x184F
-    int 10h
-    ret
-
-clear_last_char:
-    mov ah, 03h
-    int 10h
-
-    mov ah, 02h
-    sub dl, 0x1
-    int 10h
-
-    mov ah, 0Ah
-    mov al, 0x0
-    int 10h
-
-    ret
-
 multiply_by_10:
     mov ah, al
     add al, ah
@@ -422,37 +288,3 @@ multiply_by_10:
     add al, ah
     add al, ah
     ret
-
-section .data
-    sector_1 db "@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###"
-    times 0x200 - ($ - sector_1) db 0x0
-
-    sector_2 db "@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###"
-    times 0x200 - ($ - sector_2) db 0x0
-
-    sector_3 db "@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###"
-    times 0x200 - ($ - sector_3) db 0x0
-
-    main_message db "Please select an option: ", 0xA, 0xD, "1. Keyboard to Floppy", 0xA, 0xD, "2. Floppy to RAM", 0xA, 0xD, "3. RAM to Floppy", 0xA, 0xD, 0xA, 0xD, "Your option: "
-    main_message_size equ $ - main_message
-
-    unexpected_option_message db "Unexpected option!", 0xA, 0xD, 0xA, 0xD, "Press any key to continue..."
-    unexpected_option_message_size equ $ - unexpected_option_message
-
-    ktf_prompt db "Text: "
-    ktf_prompt_size equ $ - ktf_prompt
-    
-    side_prompt db "Side(0-1): "
-    side_prompt_size equ $ - side_prompt
-
-    track_prompt db "Track(01-18): "
-    track_prompt_size equ $ - track_prompt
-
-    sector_prompt db "Sector(00-79): "
-    sector_prompt_size equ $ - sector_prompt
-
-    ktf_buffer times 0x100 db 0x0
-
-    side db 0x0
-    track db 0x0
-    sector db 0x0
