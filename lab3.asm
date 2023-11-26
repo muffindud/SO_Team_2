@@ -106,8 +106,60 @@ unexpected_option:
     jmp menu
 
 keyboard_to_floppy:
+    ; Clear the screen
+    call clear_screen
+
+    ; Move the buffer pointer to the start of the buffer
+    mov si, ktf_buffer
+
+    ; Print keyboard_to_floppy prompt
+    mov ax, 1301h
+    mov bx, 0x7
+    mov bp, ktf_prompt
+    mov cx, ktf_prompt_size
+    mov dl, 0x0
+    mov dh, 0x0
+    int 10h
+
+    ; Read the input
+    ktf_input:
+        ; Call keyboard in
+        mov ah, 00h
+        int 16h
+
+        ; Check if enter was pressed
+        cmp al, 0x0D
+        je ktf_input_done
     
-    jmp menu
+        ; Check if backspace was pressed
+        cmp al, 0x08
+        je ktf_bakcspace
+
+        ; Check if the buffer is full
+        cmp si, ktf_buffer + 0x100
+        je ktf_input
+
+        ; Check if the character is in printable ASCII limit
+        cmp al, 0x20
+        jl ktf_input
+        cmp al, 0x7E
+        jg ktf_input
+
+        ; Store the character in the buffer
+        mov [si], al
+        add si, 0x1
+
+        ; Print the character
+        mov ah, 0x0E
+        int 10h
+
+        jmp ktf_input
+
+ktf_input_done:
+    ; TODO
+
+ktf_bakcspace:
+    ; TODO
 
 floppy_to_ram:
         
@@ -141,3 +193,8 @@ section .data
 
     unexpected_option_message db "Unexpected option!", 0xA, 0xD, 0xA, 0xD, "Press any key to continue..."
     unexpected_option_message_size equ $ - unexpected_option_message
+
+    ktf_prompt db "Text: "
+    ktf_prompt_size equ $ - ktf_prompt
+
+    ktf_buffer times 0x100 db 0x0
