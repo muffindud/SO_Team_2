@@ -156,7 +156,176 @@ keyboard_to_floppy:
         jmp ktf_input
 
 ktf_input_done:
-    ; TODO
+    ; Check if the buffer is empty
+    sub si, ktf_buffer
+    jz menu
+
+    ; Get the current cursor position
+    mov ah, 03h
+    int 10h
+
+    ; Print the buffer
+    mov ax, 1301h
+    mov bx, 0x7
+    mov bp, ktf_buffer
+    mov cx, si
+    mov dl, 0x0
+    add dh, 0x2
+    int 10h
+
+    mov ax, 1301h
+    mov bx, 0x7
+    mov bp, side_prompt
+    mov cx, side_prompt_size
+    mov dl, 0x0
+    add dh, 0x2
+    int 10h
+
+    get_side:
+        mov ah, 00h
+        int 16h
+
+        cmp al, '0'
+        jl get_side
+        cmp al, '1'
+        jg get_side
+
+        mov ah, 0Eh
+        int 10h
+
+        sub al, 0x30
+        mov [side], al
+         
+    mov ax, 1301h
+    mov bx, 0x7
+    mov bp, track_prompt
+    mov cx, track_prompt_size
+    mov dl, 0x0
+    add dh, 0x1
+    int 10h
+    
+    get_track:
+        mov ah, 00h
+        int 16h
+
+        cmp al, '0'
+        jl get_track
+        cmp al, '1'
+        jg get_track
+
+        mov ah, 0Eh
+        int 10h
+
+        sub al, 0x30
+        call multiply_by_10
+        mov [track], al
+
+        cmp al, 0xA
+        je get_track_1
+
+        ; Get the second digit of the track when the first digit is 0
+        get_track_0:
+            mov ah, 00h
+            int 16h
+
+            cmp al, '1'
+            jl get_track_0
+            cmp al, '9'
+            jg get_track_0
+
+            mov ah, 0Eh
+            int 10h
+
+            sub al, 0x30
+            add [track], al
+
+            jmp get_sector_prompt
+
+        ; Get the second digit of the track when the first digit is 1
+        get_track_1:
+            mov ah, 00h
+            int 16h
+
+            cmp al, '0'
+            jl get_track_1
+            cmp al, '8'
+            jg get_track_1
+
+            mov ah, 0Eh
+            int 10h
+
+            sub al, 0x30
+            add [track], al
+
+            jmp get_sector_prompt
+    
+    get_sector_prompt:
+        mov ax, 1301h
+        mov bx, 0x7
+        mov bp, sector_prompt
+        mov cx, sector_prompt_size
+        mov dl, 0x0
+        add dh, 0x1
+        int 10h
+
+    get_sector:
+        mov ah, 00h
+        int 16h
+
+        cmp al, '0'
+        jl get_sector
+        cmp al, '7'
+        jg get_sector
+
+        mov ah, 0Eh
+        int 10h
+
+        sub al, 0x30
+        call multiply_by_10
+        mov [sector], al
+
+        cmp al, 0x46
+        je get_sector_1
+
+        ; Get the second digit of the sector when the first digit is 0
+        get_sector_0:
+            mov ah, 00h
+            int 16h
+
+            cmp al, '1'
+            jl get_sector_0
+            cmp al, '9'
+            jg get_sector_0
+
+            mov ah, 0Eh
+            int 10h
+
+            sub al, 0x30
+            add [sector], al
+
+            jmp write_to_floppy
+        
+        ; Get the second digit of the sector when the first digit is 1-7
+        get_sector_1:
+            mov ah, 00h
+            int 16h
+
+            cmp al, '0'
+            jl get_sector_1
+            cmp al, '9'
+            jg get_sector_1
+
+            mov ah, 0Eh
+            int 10h
+
+            sub al, 0x30
+            add [sector], al
+
+            jmp write_to_floppy
+
+write_to_floppy:
+    : TODO: Write to floppy
+    jmp $
 
 ktf_bakcspace:
     ; Get the current cursor position
@@ -217,6 +386,33 @@ clear_screen:
     int 10h
     ret
 
+clear_last_char:
+    mov ah, 03h
+    int 10h
+
+    mov ah, 02h
+    sub dl, 0x1
+    int 10h
+
+    mov ah, 0Ah
+    mov al, 0x0
+    int 10h
+
+    ret
+
+multiply_by_10:
+    mov ah, al
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    add al, ah
+    ret
+
 section .data
     sector_1 db "@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###@@@FAF-213 Corneliu Catlabuga###"
     times 0x200 - ($ - sector_1) db 0x0
@@ -235,5 +431,23 @@ section .data
 
     ktf_prompt db "Text: "
     ktf_prompt_size equ $ - ktf_prompt
+    
+    side_prompt db "Side(0-1): "
+    side_prompt_size equ $ - side_prompt
+
+    track_prompt db "Track(01-18): "
+    track_prompt_size equ $ - track_prompt
+
+    sector_prompt db "Sector(00-79): "
+    sector_prompt_size equ $ - sector_prompt
 
     ktf_buffer times 0x100 db 0x0
+    ; coord_buffer_side db 0x0
+    ; coord_buffer_track_1 db 0x0
+    ; coord_buffer_track_2 db 0x0
+    ; coord_buffer_sector_1 db 0x0
+    ; coord_buffer_sector_2 db 0x0
+
+    side db 0x0
+    track db 0x0
+    sector db 0x0
