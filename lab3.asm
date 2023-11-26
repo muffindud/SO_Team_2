@@ -292,7 +292,7 @@ ktf_input_done:
             mov ah, 00h
             int 16h
 
-            cmp al, '1'
+            cmp al, '0'
             jl get_sector_0
             cmp al, '9'
             jg get_sector_0
@@ -324,7 +324,17 @@ ktf_input_done:
             jmp write_to_floppy
 
 write_to_floppy:
-    : TODO: Write to floppy
+    ; TODO: Add the times functionality
+
+    mov ah, 03h
+    mov dl, 0x0
+    mov al, 0x1
+    mov cl, [track]
+    mov dh, [side]
+    mov ch, [sector]
+    mov bx, ktf_buffer
+    int 13h
+
     jmp $
 
 ktf_bakcspace:
@@ -442,11 +452,6 @@ section .data
     sector_prompt_size equ $ - sector_prompt
 
     ktf_buffer times 0x100 db 0x0
-    ; coord_buffer_side db 0x0
-    ; coord_buffer_track_1 db 0x0
-    ; coord_buffer_track_2 db 0x0
-    ; coord_buffer_sector_1 db 0x0
-    ; coord_buffer_sector_2 db 0x0
 
     side db 0x0
     track db 0x0
