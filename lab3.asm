@@ -159,7 +159,46 @@ ktf_input_done:
     ; TODO
 
 ktf_bakcspace:
-    ; TODO
+    ; Get the current cursor position
+    mov ah, 03h
+    int 10h
+
+    ; Check if the cursor is at the start of buffer
+    cmp si, ktf_buffer
+    je ktf_input
+
+    sub si, 0x1
+    mov byte [si], 0x0
+
+    ; Check if the cursor is at the start of line
+    cmp dl, 0x0
+    jz ktf_bakcspace_no_newline
+
+    ; Move the cursor back
+    mov ah, 02h
+    sub dl, 0x1
+    int 10h
+
+    ; Remove the character from the screen
+    mov ah, 0Ah
+    mov al, 0x0
+    int 10h
+
+    jmp ktf_input
+
+ktf_bakcspace_no_newline:
+    ; Move the cursor to the end of the previous line
+    mov ah, 02h
+    mov dl, 0x4F
+    sub dh, 0x1
+    int 10h
+
+    ; Remove the character from the screen
+    mov ah, 0Ah
+    mov al, 0x0
+    int 10h
+
+    jmp ktf_input
 
 floppy_to_ram:
         
