@@ -45,6 +45,25 @@ start:
     mov bx, sector_2
     int 13h
 
+    ; Write sector 3
+    ; to 2311
+    mov ah, 03h
+    mov al, 0x1
+    mov ch, 0x40
+    mov dh, 0x0
+    mov cl, 0x8
+    mov bx, sector_3
+    int 13h
+
+    ; to 2340
+    mov ah, 03h
+    mov al, 0x1
+    mov ch, 0x41
+    mov dh, 0x0
+    mov cl, 0x1
+    mov bx, sector_3
+    int 13h
+
     jmp $
 
 section .data
@@ -53,3 +72,6 @@ section .data
 
     sector_2 db "@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###@@@FAF-213 Beatricia Golban###"
     times 0x200 - ($ - sector_2) db 0x00
+
+    sector_3 db "@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###@@@FAF-213 Gabriel Gitlan###"
+    times 0x200 - ($ - sector_3) db 0x00
