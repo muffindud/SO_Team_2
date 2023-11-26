@@ -1,15 +1,11 @@
-; lab3.asm
-
-; nasm -f bin -o lab3.img lab3.asm
-; trucate lab3.img -S 1474560
-
-; BIOS loads boot sector to 0x7C00
-org 0x7C00
+; [bits 16]
+; [org 0x7C00]
 
 start:
     ; Write sector 1
     ; to 2041
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x38
     mov dh, 0x1
@@ -19,6 +15,7 @@ start:
 
     ; to 2070
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x39
     mov dh, 0x1
@@ -29,6 +26,7 @@ start:
     ; Write sector 2
     ; to 2281
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x3F
     mov dh, 0x0
@@ -38,6 +36,7 @@ start:
 
     ; to 2310
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x40
     mov dh, 0x0
@@ -48,6 +47,7 @@ start:
     ; Write sector 3
     ; to 2311
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x40
     mov dh, 0x0
@@ -57,6 +57,7 @@ start:
 
     ; to 2340
     mov ah, 03h
+    mov dl, 0x0
     mov al, 0x1
     mov ch, 0x41
     mov dh, 0x0
