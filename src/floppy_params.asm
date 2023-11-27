@@ -150,10 +150,9 @@ read_num:
         jmp read_num
 
     read_num_return:
-        mov cx, [num_buffer]
-        cmp cx, 0x0
-        je read_num
-
+        ; mov cx, [num_buffer]
+        ; cmp cx, 0x0
+        ; je read_num
         ret
 
     read_num_backspace:
@@ -210,6 +209,42 @@ print_side_warning:
     add dh, 0x1
     mov bp, side_warning
     mov cx, side_warning_size
+    int 10h
+
+    mov ah, 02h
+    sub dh, 0x1
+    int 10h
+
+    ret
+
+print_track_warning:
+    mov ah, 03h
+    int 10h
+
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    add dh, 0x1
+    mov bp, track_warning
+    mov cx, track_warning_size
+    int 10h
+
+    mov ah, 02h
+    sub dh, 0x1
+    int 10h
+
+    ret
+
+print_sector_warning:
+    mov ah, 03h
+    int 10h
+
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    add dh, 0x1
+    mov bp, sector_warning
+    mov cx, sector_warning_size
     int 10h
 
     mov ah, 02h
