@@ -5,14 +5,11 @@ keyboard_to_floppy:
     ; Move the buffer pointer to the start of the buffer
     mov si, ktf_buffer
 
-    ; Print keyboard_to_floppy prompt
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, ktf_prompt
-    mov cx, ktf_prompt_size
-    mov dl, 0x0
-    mov dh, 0x0
-    int 10h
+    ; Print the escape prompt
+    call print_esc_prompt
+
+    ; Print text prompt
+    call print_text_prompt
 
     ; Read the input
     ktf_input:
@@ -57,23 +54,14 @@ ktf_input_done:
     mov ah, 03h
     int 10h
 
-    ; Print the buffer
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, ktf_buffer
-    mov cx, si
-    mov dl, 0x0
-    add dh, 0x2
-    int 10h
+    ; Print reset prompt
+    call print_reset_prompt
 
+    ; Print the buffer
+    call print_buffer
+    
     ; Prompt the user for side
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, side_prompt
-    mov cx, side_prompt_size
-    mov dl, 0x0
-    add dh, 0x2
-    int 10h
+    call print_side_prompt
 
     get_side:
         mov ah, 00h
@@ -91,13 +79,7 @@ ktf_input_done:
         mov [side], al
     
     ; Prompt the user for track
-    mov ax, 1301h
-    mov bx, 0x7
-    mov bp, track_prompt
-    mov cx, track_prompt_size
-    mov dl, 0x0
-    add dh, 0x1
-    int 10h
+    call print_track_prompt
     
     get_track:
         mov ah, 00h
@@ -156,14 +138,8 @@ ktf_input_done:
     
     ; Prompt the user for sector
     get_sector_prompt:
-        mov ax, 1301h
-        mov bx, 0x7
-        mov bp, sector_prompt
-        mov cx, sector_prompt_size
-        mov dl, 0x0
-        add dh, 0x1
-        int 10h
-
+        call print_sector_prompt
+        
     get_sector:
         mov ah, 00h
         int 16h
@@ -232,7 +208,16 @@ write_to_floppy:
     mov bx, ktf_buffer
     int 13h
 
-    jmp $
+    mov si, ktf_buffer
+
+clear_buffer:
+    mov byte [si], 0x0
+    add si, 0x1
+
+    cmp si, ktf_buffer + 0x100
+    jne clear_buffer
+
+    jmp menu
 
 ktf_bakcspace:
     ; Get the current cursor position
@@ -250,29 +235,12 @@ ktf_bakcspace:
     cmp dl, 0x0
     jz ktf_bakcspace_no_newline
 
-    ; Move the cursor back
-    mov ah, 02h
-    sub dl, 0x1
-    int 10h
-
-    ; Remove the character from the screen
-    mov ah, 0Ah
-    mov al, 0x0
-    int 10h
+    call remove_last_char
 
     jmp ktf_input
 
 ktf_bakcspace_no_newline:
-    ; Move the cursor to the end of the previous line
-    mov ah, 02h
-    mov dl, 0x4F
-    sub dh, 0x1
-    int 10h
-
-    ; Remove the character from the screen
-    mov ah, 0Ah
-    mov al, 0x0
-    int 10h
+    call remove_last_char_line
 
     jmp ktf_input
 
