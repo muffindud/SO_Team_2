@@ -253,6 +253,10 @@ print_sector_warning:
 
     ret
 
+read_address:
+    ; TODO
+    ret
+
 section .data
     escape_prompt db "Press ESC to cancel"
     escape_prompt_size equ $ - escape_prompt
