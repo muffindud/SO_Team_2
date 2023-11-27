@@ -23,8 +23,6 @@ menu:
 
     jmp unexpected_option
 
-    jmp $
-
 unexpected_option:
     call clear_screen
 
