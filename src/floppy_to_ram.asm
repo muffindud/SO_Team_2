@@ -78,7 +78,7 @@ floppy_to_ram:
 
         mov ax, [sector]
         cmp ax, 0x50
-        jl ftr_read_floppy
+        jl ftr_get_address
 
         call print_sector_warning
         mov ax, 0x0
@@ -87,7 +87,25 @@ floppy_to_ram:
         jmp ftr_get_sector
 
     ftr_get_address:
-        ; TODO
+        mov ax, 0x0
+        mov [num_buffer], ax
+        
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xF
+        int 10h
+
+        call clear_row
+        call print_address_prompt
+
+        call read_address
+        mov ax, [num_buffer]
+        mov [xxxx], ax
+
+        mov ax, [xxxx]
+        cmp ax, 0x0
+        je ftr_read_floppy
 
 ftr_read_floppy:
     ; TODO
+    jmp $

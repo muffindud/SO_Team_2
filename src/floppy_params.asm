@@ -103,7 +103,6 @@ remove_last_char_line:
     ret
 
 read_num:
-    here:
     mov ah, 00h
     int 16h
 
@@ -178,8 +177,7 @@ read_num:
         int 10h
         popa
 
-        ; jmp read_num
-        jmp here
+        jmp read_num
 
     limit_num:
         cmp cl, 0x5
@@ -254,7 +252,112 @@ print_sector_warning:
     ret
 
 read_address:
-    ; TODO
+    mov ah, 00h
+    int 16h
+
+    cmp al, 0x0D
+    je read_address_return
+
+    cmp al, 0x08
+    je read_address_backspace
+
+    cmp al, 0x30
+    jl read_address
+
+    cmp al, 0x3A
+    jl handle_number
+
+    cmp al, 0x41
+    jl read_address
+
+    cmp al, 0x47
+    jl handle_uppercase
+
+    cmp al, 0x61
+    jl read_address
+
+    cmp al, 0x67
+    jl handle_lowercase
+
+    jmp read_address
+
+    handle_number:
+        sub al, 0x30
+        jmp handle_value
+
+    handle_uppercase:
+        sub al, 0x37
+        jmp handle_value
+
+    handle_lowercase:
+        sub al, 0x57
+        jmp handle_value
+
+    handle_value:
+        mov cl, al
+
+        mov ax, [num_buffer]
+        cmp ax, 0xFFF
+        ja read_address
+
+        mov dx, 0x10
+        mul dx
+        add ax, cx
+        mov [num_buffer], ax
+
+        mov ah, 0Eh
+        mov al, cl
+        cmp cx, 0x9
+        jg print_letter
+
+            add al, 0x30
+            int 10h
+
+            jmp read_address
+
+        print_letter:
+            add al, 0x37
+
+            int 10h
+
+            jmp read_address
+
+    read_address_return:
+        ret
+    
+    read_address_backspace:
+        mov dx, 0x0
+        mov ax, [num_buffer]
+        cmp ax, 0x0
+        je read_address
+        mov cx, 0x10
+        div cx
+        mov [num_buffer], ax
+        
+        pusha
+        ; Remove the character from the screen
+        mov ah, 03h
+        mov bh, 0x0
+        int 10h
+        mov ah, 02h
+        sub dl, 0x1
+        int 10h
+        mov ah, 0Ah
+        mov al, 0x0
+        int 10h
+        popa
+
+        jmp read_address
+
+print_address_prompt:
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    mov dh, 0xF
+    mov bp, address_prompt
+    mov cx, address_prompt_size
+    int 10h
+
     ret
 
 section .data
@@ -285,6 +388,9 @@ section .data
     sector_warning db "Sector must be in range 0-79"
     sector_warning_size equ $ - sector_warning
 
+    address_prompt db "Address(0-FFFF:0-FFFF): "
+    address_prompt_size equ $ - address_prompt
+
     ktf_buffer times 0x100 db 0x0
     clean_row times 0x50 db 0x0
     
@@ -292,3 +398,5 @@ section .data
     side dw 0x0
     track dw 0x0
     sector dw 0x0
+    xxxx dw 0x0
+    yyyy dw 0x0
