@@ -25,6 +25,10 @@ keyboard_to_floppy:
         cmp al, 0x08
         je ktf_bakcspace
 
+        ; Check if escape was pressed
+        cmp al, 0x1B
+        je escape
+
         ; Check if the buffer is full
         cmp si, ktf_buffer + 0x100
         je ktf_input
@@ -67,6 +71,16 @@ ktf_input_done:
         mov ah, 00h
         int 16h
 
+        ; Check if reset was pressed
+        cmp al, 'r'
+        je reset
+        cmp al, 'R'
+        je reset
+
+        ; Check if escape was pressed
+        cmp al, 0x1B
+        je escape
+
         cmp al, '0'
         jl get_side
         cmp al, '1'
@@ -84,6 +98,16 @@ ktf_input_done:
     get_track:
         mov ah, 00h
         int 16h
+
+        ; Check if reset was pressed
+        cmp al, 'r'
+        je reset
+        cmp al, 'R'
+        je reset
+
+        ; Check if escape was pressed
+        cmp al, 0x1B
+        je escape
 
         cmp al, '0'
         jl get_track
@@ -105,6 +129,17 @@ ktf_input_done:
             mov ah, 00h
             int 16h
 
+            ; Check if reset was pressed
+            cmp al, 'r'
+            je reset
+            cmp al, 'R'
+            je reset
+
+            ; Check if escape was pressed
+            cmp al, 0x1B
+            je escape
+
+
             cmp al, '1'
             jl get_track_0
             cmp al, '9'
@@ -122,6 +157,16 @@ ktf_input_done:
         get_track_1:
             mov ah, 00h
             int 16h
+
+            ; Check if reset was pressed
+            cmp al, 'r'
+            je reset
+            cmp al, 'R'
+            je reset
+
+            ; Check if escape was pressed
+            cmp al, 0x1B
+            je escape
 
             cmp al, '0'
             jl get_track_1
@@ -144,6 +189,16 @@ ktf_input_done:
         mov ah, 00h
         int 16h
 
+        ; Check if reset was pressed
+        cmp al, 'r'
+        je reset
+        cmp al, 'R'
+        je reset
+
+        ; Check if escape was pressed
+        cmp al, 0x1B
+        je escape
+
         cmp al, '0'
         jl get_sector
         cmp al, '7'
@@ -164,6 +219,16 @@ ktf_input_done:
             mov ah, 00h
             int 16h
 
+            ; Check if reset was pressed
+            cmp al, 'r'
+            je reset
+            cmp al, 'R'
+            je reset
+
+            ; Check if escape was pressed
+            cmp al, 0x1B
+            je escape
+
             cmp al, '0'
             jl get_sector_0
             cmp al, '9'
@@ -181,6 +246,16 @@ ktf_input_done:
         get_sector_1:
             mov ah, 00h
             int 16h
+
+            ; Check if reset was pressed
+            cmp al, 'r'
+            je reset
+            cmp al, 'R'
+            je reset
+
+            ; Check if escape was pressed
+            cmp al, 0x1B
+            je escape
 
             cmp al, '0'
             jl get_sector_1
@@ -243,6 +318,14 @@ ktf_bakcspace_no_newline:
     call remove_last_char_line
 
     jmp ktf_input
+
+reset:
+    call clear_screen
+    jmp keyboard_to_floppy
+
+escape:
+    mov si, ktf_buffer
+    jmp clear_buffer
 
 multiply_by_10:
     mov ah, al
