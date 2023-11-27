@@ -66,6 +66,9 @@ ktf_input_done:
     
     ; Prompt the user for side
     get_side:
+        mov ax, 0x0
+        mov [num_buffer], ax
+
         mov ah, 02h
         mov dl, 0x0
         mov dh, 0xC
@@ -78,195 +81,72 @@ ktf_input_done:
         mov ax, [num_buffer]
         mov [side], ax
     
-    mov ax, [side]
-    cmp ax, 0x2
-    jl get_track
-
-    call print_side_warning
-    mov ax, 0x0
-    mov [num_buffer], ax
-    mov [side], ax
-    jmp get_side
-
-    
-    ; TODO: Adapt to the new buffer
-    ; Prompt the user for track
-    call print_track_prompt
-    
-    get_track:
-        mov ah, 00h
-        int 16h
-
-        ; Check if reset was pressed
-        cmp al, 'r'
-        je reset
-        cmp al, 'R'
-        je reset
-
-        ; Check if escape was pressed
-        cmp al, 0x1B
-        je escape
-
-        cmp al, '0'
+        mov ax, [side]
+        cmp ax, 0x2
         jl get_track
-        cmp al, '1'
-        jg get_track
 
-        mov ah, 0Eh
+        call print_side_warning
+        mov ax, 0x0
+        mov [num_buffer], ax
+        mov [side], ax
+        jmp get_side
+
+    ; Prompt the user for track
+    get_track:
+        mov ax, 0x0
+        mov [num_buffer], ax
+        
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xD
         int 10h
 
-        sub al, 0x30
-        call multiply_by_10
-        mov [track], al
+        call clear_row
+        call print_track_prompt
 
-        cmp al, 0xA
-        je get_track_1
+        call read_num
+        mov ax, [num_buffer]
+        mov [track], ax
 
-        ; Get the second digit of the track when the first digit is 0
-        get_track_0:
-            mov ah, 00h
-            int 16h
+        mov ax, [track]
+        cmp ax, 0x12
+        jg track_fault
+        cmp ax, 0x0
+        je track_fault
+        jmp get_sector
 
-            ; Check if reset was pressed
-            cmp al, 'r'
-            je reset
-            cmp al, 'R'
-            je reset
-
-            ; Check if escape was pressed
-            cmp al, 0x1B
-            je escape
-
-
-            cmp al, '1'
-            jl get_track_0
-            cmp al, '9'
-            jg get_track_0
-
-            mov ah, 0Eh
-            int 10h
-
-            sub al, 0x30
-            add [track], al
-
-            jmp get_sector_prompt
-
-        ; Get the second digit of the track when the first digit is 1
-        get_track_1:
-            mov ah, 00h
-            int 16h
-
-            ; Check if reset was pressed
-            cmp al, 'r'
-            je reset
-            cmp al, 'R'
-            je reset
-
-            ; Check if escape was pressed
-            cmp al, 0x1B
-            je escape
-
-            cmp al, '0'
-            jl get_track_1
-            cmp al, '8'
-            jg get_track_1
-
-            mov ah, 0Eh
-            int 10h
-
-            sub al, 0x30
-            add [track], al
-
-            jmp get_sector_prompt
+        track_fault:
+            call print_track_warning
+            mov ax, 0x0
+            mov [num_buffer], ax
+            mov [track], ax
+            jmp get_track
     
-    ; Prompt the user for sector
-    get_sector_prompt:
-        call print_sector_prompt
-        
     get_sector:
-        mov ah, 00h
-        int 16h
-
-        ; Check if reset was pressed
-        cmp al, 'r'
-        je reset
-        cmp al, 'R'
-        je reset
-
-        ; Check if escape was pressed
-        cmp al, 0x1B
-        je escape
-
-        cmp al, '0'
-        jl get_sector
-        cmp al, '7'
-        jg get_sector
-
-        mov ah, 0Eh
+        mov ax, 0x0
+        mov [num_buffer], ax
+        
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xE
         int 10h
 
-        sub al, 0x30
-        call multiply_by_10
-        mov [sector], al
+        call clear_row
+        call print_sector_prompt
 
-        cmp al, 0x46
-        je get_sector_1
+        call read_num
+        mov ax, [num_buffer]
+        mov [sector], ax
 
-        ; Get the second digit of the sector when the first digit is 0
-        get_sector_0:
-            mov ah, 00h
-            int 16h
+        mov ax, [sector]
+        cmp ax, 0x50
+        jl write_to_floppy
 
-            ; Check if reset was pressed
-            cmp al, 'r'
-            je reset
-            cmp al, 'R'
-            je reset
-
-            ; Check if escape was pressed
-            cmp al, 0x1B
-            je escape
-
-            cmp al, '0'
-            jl get_sector_0
-            cmp al, '9'
-            jg get_sector_0
-
-            mov ah, 0Eh
-            int 10h
-
-            sub al, 0x30
-            add [sector], al
-
-            jmp write_to_floppy
-        
-        ; Get the second digit of the sector when the first digit is 1-7
-        get_sector_1:
-            mov ah, 00h
-            int 16h
-
-            ; Check if reset was pressed
-            cmp al, 'r'
-            je reset
-            cmp al, 'R'
-            je reset
-
-            ; Check if escape was pressed
-            cmp al, 0x1B
-            je escape
-
-            cmp al, '0'
-            jl get_sector_1
-            cmp al, '9'
-            jg get_sector_1
-
-            mov ah, 0Eh
-            int 10h
-
-            sub al, 0x30
-            add [sector], al
-
-            jmp write_to_floppy
+        call print_sector_warning
+        mov ax, 0x0
+        mov [num_buffer], ax
+        mov [sector], ax
+        jmp get_sector
 
 write_to_floppy:
     ; TODO: Add the times functionality
