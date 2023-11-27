@@ -6,7 +6,7 @@ keyboard_to_floppy:
     mov si, ktf_buffer
 
     ; Print the escape prompt
-    call print_esc_prompt
+    ; call print_esc_prompt
 
     ; Print text prompt
     call print_text_prompt
@@ -59,7 +59,7 @@ ktf_input_done:
     int 10h
 
     ; Print reset prompt
-    call print_reset_prompt
+    ; call print_reset_prompt
 
     ; Print the buffer
     call print_buffer
