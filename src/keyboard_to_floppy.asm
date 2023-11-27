@@ -11,7 +11,7 @@ keyboard_to_floppy:
     ; Print text prompt
     call print_text_prompt
 
-    ; Read the input
+    ; ; Read the input
     ktf_input:
         ; Call keyboard in
         mov ah, 00h
@@ -44,7 +44,7 @@ keyboard_to_floppy:
         add si, 0x1
 
         ; Print the character
-        mov ah, 0x0E
+        mov ah, 0Eh
         int 10h
 
         jmp ktf_input
@@ -65,33 +65,31 @@ ktf_input_done:
     call print_buffer
     
     ; Prompt the user for side
-    call print_side_prompt
-
     get_side:
-        mov ah, 00h
-        int 16h
-
-        ; Check if reset was pressed
-        cmp al, 'r'
-        je reset
-        cmp al, 'R'
-        je reset
-
-        ; Check if escape was pressed
-        cmp al, 0x1B
-        je escape
-
-        cmp al, '0'
-        jl get_side
-        cmp al, '1'
-        jg get_side
-
-        mov ah, 0Eh
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xC
         int 10h
 
-        sub al, 0x30
-        mov [side], al
+        call clear_row
+        call print_side_prompt
+
+        call read_num
+        mov ax, [num_buffer]
+        mov [side], ax
     
+    mov ax, [side]
+    cmp ax, 0x2
+    jl get_track
+
+    call print_side_warning
+    mov ax, 0x0
+    mov [num_buffer], ax
+    mov [side], ax
+    jmp get_side
+
+    
+    ; TODO: Adapt to the new buffer
     ; Prompt the user for track
     call print_track_prompt
     
