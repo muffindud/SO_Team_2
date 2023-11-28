@@ -3,10 +3,7 @@ keyboard_to_floppy:
     call clear_screen
 
     ; Move the buffer pointer to the start of the buffer
-    mov si, ktf_buffer
-
-    ; Print the escape prompt
-    ; call print_esc_prompt
+    mov si, buffer
 
     ; Print text prompt
     call print_text_prompt
@@ -30,7 +27,7 @@ keyboard_to_floppy:
         je escape
 
         ; Check if the buffer is full
-        cmp si, ktf_buffer + 0x100
+        cmp si, buffer + 0x100
         je ktf_input
 
         ; Check if the character is in printable ASCII limit
@@ -51,15 +48,12 @@ keyboard_to_floppy:
 
 ktf_input_done:
     ; Check if the buffer is empty
-    sub si, ktf_buffer
+    sub si, buffer
     jz menu
 
     ; Get the current cursor position
     mov ah, 03h
     int 10h
-
-    ; Print reset prompt
-    ; call print_reset_prompt
 
     ; Print the buffer
     call print_buffer
@@ -158,16 +152,16 @@ write_to_floppy:
     mov cl, [track]
     mov dh, [side]
     mov ch, [sector]
-    mov bx, ktf_buffer
+    mov bx, buffer
     int 13h
 
-    mov si, ktf_buffer
+    mov si, buffer
 
 clear_buffer:
     mov byte [si], 0x0
     add si, 0x1
 
-    cmp si, ktf_buffer + 0x100
+    cmp si, buffer + 0x100
     jne clear_buffer
 
     jmp menu
@@ -178,7 +172,7 @@ ktf_bakcspace:
     int 10h
 
     ; Check if the cursor is at the start of buffer
-    cmp si, ktf_buffer
+    cmp si, buffer
     je ktf_input
 
     sub si, 0x1
@@ -197,23 +191,6 @@ ktf_bakcspace_no_newline:
 
     jmp ktf_input
 
-reset:
-    call clear_screen
-    jmp keyboard_to_floppy
-
 escape:
-    mov si, ktf_buffer
+    mov si, buffer
     jmp clear_buffer
-
-multiply_by_10:
-    mov ah, al
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    add al, ah
-    ret
