@@ -22,7 +22,7 @@ read_num:
     mov ax, [num_buffer]
 
     cmp ax, 0xCCC
-    je limit_num ; (accept between 0 and 5)
+    je limit_num ; (accept between 0 and 7)
     cmp ax, 0xCCC
     jl accept_num
 
@@ -70,7 +70,7 @@ read_num:
         jmp read_num
 
     limit_num:
-        cmp cl, 0x5
+        cmp cl, 0x7
         jg read_num
         jmp accept_num
 
