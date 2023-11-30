@@ -1,15 +1,31 @@
 floppy_to_ram:
     call clear_screen
 
-    ; call print_esc_prompt
-
-    ftr_get_side:
+    ; Prompt the user for sectors
+    ftr_get_sectors:
         mov ax, 0x0
         mov [num_buffer], ax
 
         mov ah, 02h
         mov dl, 0x0
         mov dh, 0x0
+        int 10h
+
+        call clear_row
+        call print_sectors_prompt
+
+        call read_num
+        mov ax, [num_buffer]
+        mov [sectors], ax
+
+    ; Prompt the user for side
+    ftr_get_side:
+        mov ax, 0x0
+        mov [num_buffer], ax
+
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xC
         int 10h
 
         call clear_row
@@ -78,7 +94,7 @@ floppy_to_ram:
 
         mov ax, [sector]
         cmp ax, 0x50
-        jl ftr_get_address
+        jl ftr_get_address_1
 
         call print_sector_warning
         mov ax, 0x0
@@ -86,7 +102,7 @@ floppy_to_ram:
         mov [sector], ax
         jmp ftr_get_sector
 
-    ftr_get_address:
+    ftr_get_address_1:
         mov ax, 0x0
         mov [num_buffer], ax
         
@@ -101,11 +117,46 @@ floppy_to_ram:
         call read_address
         mov ax, [num_buffer]
         mov [xxxx], ax
+    
+    ftr_get_address_2:
+        mov ax, 0x0
+        mov [num_buffer], ax
 
-        mov ax, [xxxx]
-        cmp ax, 0x0
-        je ftr_read_floppy
+        mov ah, 0Eh
+        mov al, ':'
+        int 10h
+
+        call read_address
+        mov ax, [num_buffer]
+        mov [yyyy], ax
 
 ftr_read_floppy:
-    ; TODO
+    mov ah, 02h
+    mov dl, 0x0
+    mov al, [sectors]
+    mov cl, [track]
+    mov dh, [side]
+    mov ch, [sector]
+
+    mov bx, [xxxx]
+    mov es, bx
+    mov bx, [yyyy]
+
+    int 13h
+
+    push es
+    push bx
+    call clear_screen
+    pop bx
+    pop es
+
+    mov bp, bx
+
+    mov ax, 1301h
+    mov bl, 0x7
+    mov cx, 0x200
+    mov dh, 0x0
+    mov dl, 0x0
+    int 10h
+
     jmp $

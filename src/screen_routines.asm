@@ -25,7 +25,6 @@ remove_last_char_line:
 
     ret
 
-
 clear_row:
     mov ah, 03h
     int 10h 

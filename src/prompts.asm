@@ -1,3 +1,14 @@
+print_sectors_prompt:
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    mov dh, 0xB
+    mov bp, sectors_prompt
+    mov cx, sectors_prompt_size
+    int 10h
+    
+    ret
+
 print_text_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -122,6 +133,9 @@ section .data
     text_prompt db "Text: "
     text_prompt_size equ $ - text_prompt
     
+    sectors_prompt db "Sectors: "
+    sectors_prompt_size equ $ - sectors_prompt
+
     side_prompt db "Side(0-1): "
     side_prompt_size equ $ - side_prompt
 
