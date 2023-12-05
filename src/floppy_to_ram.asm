@@ -144,19 +144,29 @@ ftr_read_floppy:
 
     int 13h
 
-    push es
-    push bx
     call clear_screen
-    pop bx
-    pop es
 
-    mov bp, bx
+    jnc ftr_read_success
+    call print_error
+
+ftr_read_success:
+    mov ax, [sectors]
+    mov dx, 0x200
+    mul dx
+    mov cx, ax
 
     mov ax, 1301h
-    mov bl, 0x7
-    mov cx, 0x200
+    mov bx, 0x7
     mov dh, 0x0
     mov dl, 0x0
+    mov bp, [xxxx]
+    mov es, bp
+    mov bp, [yyyy]
     int 10h
 
-    jmp $
+    mov ah, 00h
+    int 16h
+    
+    ; TODO: Add paging
+
+    jmp menu

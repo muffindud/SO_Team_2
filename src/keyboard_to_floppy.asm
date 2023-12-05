@@ -155,6 +155,12 @@ write_to_floppy:
     mov bx, buffer
     int 13h
 
+    call clear_screen
+
+    jnc ktf_write_success
+    call print_error
+
+ktf_write_success:
     mov si, buffer
 
 clear_buffer:

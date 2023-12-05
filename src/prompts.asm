@@ -9,6 +9,17 @@ print_sectors_prompt:
     
     ret
 
+print_volume_prompt:
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    mov dh, 0xB
+    mov bp, volume_prompt
+    mov cx, volume_prompt_size
+    int 10h
+
+    ret
+
 print_text_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -135,6 +146,9 @@ section .data
     
     sectors_prompt db "Sectors: "
     sectors_prompt_size equ $ - sectors_prompt
+
+    volume_prompt db "Volume(bytes): "
+    volume_prompt_size equ $ - volume_prompt
 
     side_prompt db "Side(0-1): "
     side_prompt_size equ $ - side_prompt

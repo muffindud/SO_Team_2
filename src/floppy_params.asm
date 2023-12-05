@@ -1,6 +1,7 @@
 section .data
     num_buffer dw 0x0
     sectors dw 0x0
+    volume dw 0x0
     side dw 0x0
     track dw 0x0
     sector dw 0x0

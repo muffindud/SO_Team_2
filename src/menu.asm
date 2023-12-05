@@ -40,12 +40,15 @@ unexpected_option:
     jmp menu
 
 clear_screen:
+    pusha
     mov ah, 07h
     mov al, 0x0
     mov bh, 0x7
     mov cx, 0x0
     mov dx, 0x184F
     int 10h
+    popa
+    
     ret
 
 section .data
