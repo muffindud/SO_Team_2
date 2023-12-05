@@ -15,6 +15,10 @@ floppy_to_ram:
         call print_sectors_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [sectors], ax
 
@@ -32,6 +36,10 @@ floppy_to_ram:
         call print_side_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [side], ax
     
@@ -59,6 +67,10 @@ floppy_to_ram:
         call print_track_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [track], ax
 
@@ -89,6 +101,10 @@ floppy_to_ram:
         call print_sector_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [sector], ax
 
@@ -115,6 +131,10 @@ floppy_to_ram:
         call print_address_prompt
 
         call read_address
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [xxxx], ax
     
@@ -127,6 +147,10 @@ floppy_to_ram:
         int 10h
 
         call read_address
+
+        cmp al, 0x1B
+        je menu
+        
         mov ax, [num_buffer]
         mov [yyyy], ax
 

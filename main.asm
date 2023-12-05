@@ -17,11 +17,3 @@ jmp menu
 
 ; TODO: keyboard_to_floppy.asm
 ; TODO: Add repetition times
-; TODO: Add retruing option
-; TODO: Add buffer cleaning
-
-; TODO: floppy_to_ram.asm
-; TODO: Implement
-
-; TODO: ram_to_floppy.asm
-; TODO: Implement

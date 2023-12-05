@@ -72,6 +72,10 @@ ktf_input_done:
         call print_side_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je escape
+        
         mov ax, [num_buffer]
         mov [side], ax
     
@@ -99,6 +103,10 @@ ktf_input_done:
         call print_track_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je escape
+        
         mov ax, [num_buffer]
         mov [track], ax
 
@@ -129,6 +137,10 @@ ktf_input_done:
         call print_sector_prompt
 
         call read_num
+
+        cmp al, 0x1B
+        je escape
+        
         mov ax, [num_buffer]
         mov [sector], ax
 

@@ -2,6 +2,10 @@ read_num:
     mov ah, 00h
     int 16h
 
+    ; Check if the key is escape
+    cmp al, 0x1B
+    je read_num_return
+
     ; Check if the key is enter
     cmp al, 0x0D
     je read_num_return
@@ -77,6 +81,9 @@ read_num:
 read_address:
     mov ah, 00h
     int 16h
+    
+    cmp al, 0x1B
+    je read_address_return
 
     cmp al, 0x0D
     je read_address_return
