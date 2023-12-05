@@ -1,6 +1,13 @@
 menu:
     call clear_screen
 
+    mov ax, 0x7E00
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7E00
+
+
     mov ax, 1301h
     mov bx, 0x7
     mov bp, main_message
