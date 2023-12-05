@@ -150,23 +150,30 @@ ftr_read_floppy:
     call print_error
 
 ftr_read_success:
-    mov ax, [sectors]
-    mov dx, 0x200
-    mul dx
-    mov cx, ax
+    mov dx, [sectors]
 
-    mov ax, 1301h
-    mov bx, 0x7
-    mov dh, 0x0
-    mov dl, 0x0
     mov bp, [xxxx]
     mov es, bp
     mov bp, [yyyy]
-    int 10h
 
-    mov ah, 00h
-    int 16h
-    
-    ; TODO: Add paging
+    ftr_print_loop:
+        push dx
+        call clear_screen
+        mov ax, 1301h
+        mov bx, 0x7
+        mov cx, 0x200
+        mov dh, 0x0
+        mov dl, 0x0
+        int 10h
+        pop dx
+
+        sub dx, 0x1
+        add bp, 0x200
+
+        mov ah, 00h
+        int 16h
+
+        cmp dx, 0x0
+        jne ftr_print_loop
 
     jmp menu
