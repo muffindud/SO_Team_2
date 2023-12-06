@@ -9,6 +9,8 @@ section .data
     xxxx dw 0x0
     yyyy dw 0x0
 
+    clean_row times 0x50 db 0x0
+
     buffer times 0x100 db 0x0
 
     floppy_buffer db 0x0

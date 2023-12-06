@@ -208,5 +208,3 @@ section .data
     
     flp_err_80 db "Time-out"
     flp_err_80_len equ $ - flp_err_80
-
-    clean_row times 0x50 db 0x0

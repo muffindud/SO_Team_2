@@ -186,14 +186,16 @@ write_to_floppy:
 
     mov di, floppy_buffer
     mov ax, [write_times]
+    mov dx, 0x0
 
     repeated_wirte:
         mov si, buffer
         cmp ax, 0x0
         je to_floppy
         sub ax, 0x1
+        add dx, [write_times]
 
-        char_wirte:
+        char_write:
             mov cl, [si]
             mov [di], cl
             add si, 0x1
@@ -201,35 +203,80 @@ write_to_floppy:
 
             cmp byte [si], 0x0
             je repeated_wirte
-            jmp char_wirte
+            jmp char_write
 
     to_floppy:
-        ; Write to floppy
-        mov ah, 03h
-        mov dl, 0x0
-        mov al, 0x1 ; TODO: Check if works
-        mov cl, [track]
-        mov dh, [side]
-        mov ch, [sector]
-        mov bx, floppy_buffer
-        int 13h
-
-        call clear_screen
-
-        mov ax, 1301h
-        mov bx, 0x7
-        mov cx, 512
+        mov ax, dx
         mov dx, 0x0
-        mov bp, floppy_buffer
-        int 10h
+        mov cx, 0x100
+        div cx
+        
+        cmp ah, 0x0
+        je ah_zero
 
-        mov ah, 0
-        int 16h
+        add al, 0x1
+        
+        mov cl, al
+
+        ah_zero:
+        ; Write to floppy
+            mov al, 0x1
+            mov bx, floppy_buffer
+
+            write_loop:
+                push cx
+                mov ah, 03h
+                mov dl, 0x0
+                ; mov al, 0x1 ; TODO: Check if works
+                mov cl, [track]
+                mov dh, [side]
+                mov ch, [sector]
+                int 13h
+
+                add cl, 0x1
+                cmp cl, 0x13
+                jl write_continue
+                mov cl, 0x0
+                add dh, 0x1
+
+                cmp dh, 0x2
+                jl write_continue
+                mov dh, 0x0
+                add ch, 0x1
+
+                cmp ch, 0x50
+                jl write_continue
+                jge override_disk
+
+                write_continue:
+                    mov word [track], 0x0
+                    mov word [side], 0x0
+                    mov word [sector], 0x0
+                    mov [track], cl
+                    mov [side], dh
+                    mov [sector], ch
+                
+                pop cx
+
+                sub cl, 0x1
+                mov al, 0x1
+                add bx, 0x200
+                cmp cl, 0x0
+                jne write_loop
 
     call clear_screen
 
     jnc ktf_write_success
     call print_error
+
+    jmp ktf_write_success
+
+override_disk:
+    pop cx
+    call print_override_disk
+
+    mov ah, 00h
+    int 16h
 
 ktf_write_success:
     mov si, buffer
@@ -240,6 +287,15 @@ clear_buffer:
 
     cmp si, buffer + 0x100
     jne clear_buffer
+
+    mov di, floppy_buffer
+
+clear_floppy_buffer:
+    mov byte [di], 0x0
+    add di, 0x1
+
+    cmp byte [di], 0x0
+    jne clear_floppy_buffer
 
     jmp menu
 
