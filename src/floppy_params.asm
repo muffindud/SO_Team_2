@@ -1,6 +1,7 @@
 section .data
     num_buffer dw 0x0
     sectors dw 0x0
+    write_times dw 0x0
     volume dw 0x0
     side dw 0x0
     track dw 0x0
@@ -9,3 +10,5 @@ section .data
     yyyy dw 0x0
 
     buffer times 0x100 db 0x0
+
+    floppy_buffer db 0x0

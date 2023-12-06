@@ -146,7 +146,7 @@ ktf_input_done:
 
         mov ax, [sector]
         cmp ax, 0x50
-        jl write_to_floppy
+        jl get_times
 
         call print_sector_warning
         mov ax, 0x0
@@ -154,18 +154,77 @@ ktf_input_done:
         mov [sector], ax
         jmp get_sector
 
+    get_times:
+        mov ax, 0x0
+        mov [num_buffer], ax
+        
+        mov ah, 02h
+        mov dl, 0x0
+        mov dh, 0xF
+        int 10h
+
+        call clear_row
+        call print_times_prompt
+
+        call read_num
+
+        mov ax, [num_buffer]
+        mov [write_times], ax
+
+        mov ax, [write_times]
+        cmp ax, 0x7531
+        jl write_to_floppy
+
+        call print_times_warning
+        mov ax, 0x0
+        mov [num_buffer], ax
+        mov [write_times], ax
+        jmp get_times
+
 write_to_floppy:
     ; TODO: Add the times functionality
 
-    ; Write to floppy
-    mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov cl, [track]
-    mov dh, [side]
-    mov ch, [sector]
-    mov bx, buffer
-    int 13h
+    mov di, floppy_buffer
+    mov ax, [write_times]
+
+    repeated_wirte:
+        mov si, buffer
+        cmp ax, 0x0
+        je to_floppy
+        sub ax, 0x1
+
+        char_wirte:
+            mov cl, [si]
+            mov [di], cl
+            add si, 0x1
+            add di, 0x1
+
+            cmp byte [si], 0x0
+            je repeated_wirte
+            jmp char_wirte
+
+    to_floppy:
+        ; Write to floppy
+        mov ah, 03h
+        mov dl, 0x0
+        mov al, 0x1 ; TODO: Check if works
+        mov cl, [track]
+        mov dh, [side]
+        mov ch, [sector]
+        mov bx, [floppy_buffer]
+        int 13h
+
+        call clear_screen
+
+        mov ax, 1301h
+        mov bx, 0x7
+        mov cx, 512
+        mov dx, 0x0
+        mov bp, [floppy_buffer]
+        int 10h
+
+        mov ah, 0
+        int 16h
 
     call clear_screen
 

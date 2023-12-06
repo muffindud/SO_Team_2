@@ -75,6 +75,35 @@ print_sector_prompt:
 
     ret
 
+print_times_prompt:
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    mov dh, 0xF
+    mov bp, times_prompt
+    mov cx, times_prompt_size
+    int 10h
+
+    ret
+
+print_times_warning:
+    mov ah, 03h
+    int 10h
+
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    add dh, 0x1
+    mov bp, times_warning
+    mov cx, times_warning_size
+    int 10h
+
+    mov ah, 02h
+    sub dh, 0x1
+    int 10h
+
+    ret
+
 print_side_warning:
     mov ah, 03h
     int 10h
@@ -167,6 +196,12 @@ section .data
 
     sector_warning db "Sector must be in range 0-79"
     sector_warning_size equ $ - sector_warning
+
+    times_prompt db "Times(1-30000): "
+    times_prompt_size equ $ - times_prompt
+
+    times_warning db "Times must be in range 1-30000"
+    times_warning_size equ $ - times_warning
 
     address_prompt db "Address(0-FFFF:0-FFFF): "
     address_prompt_size equ $ - address_prompt
