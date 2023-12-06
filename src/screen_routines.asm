@@ -1,3 +1,15 @@
+clear_screen:
+    pusha
+    mov ah, 07h
+    mov al, 0x0
+    mov bh, 0x7
+    mov cx, 0x0
+    mov dx, 0x184F
+    int 10h
+    popa
+    
+    ret
+
 remove_last_char:
     ; Move the cursor back
     mov ah, 02h

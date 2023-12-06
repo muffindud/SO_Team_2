@@ -211,7 +211,7 @@ write_to_floppy:
         mov cl, [track]
         mov dh, [side]
         mov ch, [sector]
-        mov bx, [floppy_buffer]
+        mov bx, floppy_buffer
         int 13h
 
         call clear_screen
@@ -220,7 +220,7 @@ write_to_floppy:
         mov bx, 0x7
         mov cx, 512
         mov dx, 0x0
-        mov bp, [floppy_buffer]
+        mov bp, floppy_buffer
         int 10h
 
         mov ah, 0
