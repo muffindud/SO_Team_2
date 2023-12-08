@@ -6,6 +6,10 @@ clear_screen:
     mov cx, 0x0
     mov dx, 0x184F
     int 10h
+
+    mov ah, 02h
+    mov dx, 0x0
+    int 10h
     popa
     
     ret

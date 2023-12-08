@@ -184,42 +184,65 @@ ktf_input_done:
 write_to_floppy:
     ; TODO: Add the times functionality
 
+    ; I am losing my mind over this
+    ; Why are we still here? Just to suffer?
+    ; Every night, I can feel my leg... and my arm... even my fingers...
+    ; The body I've lost... the comrades I've lost... won't stop hurting...
+    ; It's like they're all still there. You feel it, too, don't you?
+    ; I'm gonna make them give back our past.
+    
     mov di, floppy_buffer
-    mov ax, [write_times]
-    mov dx, 0x0
+    mov cx, [write_times]
+    mov ax, 0x0
 
-    repeated_wirte:
+    repeated_write:
         mov si, buffer
-        cmp ax, 0x0
-        je to_floppy
-        sub ax, 0x1
-        add dx, [write_times]
 
+        cmp cx, 0x0
+        je to_floppy
+        
+        sub cx, 0x1
         char_write:
-            mov cl, [si]
-            mov [di], cl
+            add ax, 0x1
+            push cx
+            mov cl, byte [si]
+            mov byte [di], cl
+            pop cx
+
             add si, 0x1
             add di, 0x1
 
             cmp byte [si], 0x0
-            je repeated_wirte
+            je repeated_write
             jmp char_write
 
     to_floppy:
-        mov ax, dx
         mov dx, 0x0
+        mov ax, ax
         mov cx, 0x100
         div cx
-        
-        cmp ah, 0x0
-        je ah_zero
 
-        add al, 0x1
-        
-        mov cl, al
+        ; mov [temp_byte_ax], ax
+        mov [temp_byte_dx], dx
 
-        ah_zero:
+        ; For some reason al is squared
+        
+        cmp dx, 0x0
+        je dx_zero
+
+        add ax, 0x1
+
+        ; push ax
+        ; mov ah, 00h
+        ; int 16h
+        ; pop ax
+        
+        dx_zero:
         ; Write to floppy
+            mov [temp_byte_ax], ax
+
+            mov cx, ax
+            mov ax, 0x0
             mov al, 0x1
             mov bx, floppy_buffer
 
@@ -227,42 +250,48 @@ write_to_floppy:
                 push cx
                 mov ah, 03h
                 mov dl, 0x0
-                ; mov al, 0x1 ; TODO: Check if works
                 mov cl, [track]
                 mov dh, [side]
                 mov ch, [sector]
                 int 13h
 
                 add cl, 0x1
-                cmp cl, 0x13
+                cmp cl, 0x12
                 jl write_continue
                 mov cl, 0x0
                 add dh, 0x1
 
-                cmp dh, 0x2
+                cmp dh, 0x1
                 jl write_continue
                 mov dh, 0x0
                 add ch, 0x1
 
                 cmp ch, 0x50
-                jl write_continue
                 jge override_disk
 
                 write_continue:
-                    mov word [track], 0x0
-                    mov word [side], 0x0
-                    mov word [sector], 0x0
                     mov [track], cl
                     mov [side], dh
                     mov [sector], ch
-                
-                pop cx
 
-                sub cl, 0x1
+                pop cx
+                
+                sub cx, 0x1
                 mov al, 0x1
-                add bx, 0x200
-                cmp cl, 0x0
-                jne write_loop
+                
+                cmp bx, 0xFEFF
+                jl keep_es
+
+                push bx
+                mov bx, es
+                add bx, 0x1
+                mov es, bx
+                pop bx
+
+                keep_es:    
+                    add bx, 0x100
+                    cmp cl, 0x0
+                    jne write_loop
 
     call clear_screen
 
