@@ -192,25 +192,27 @@ write_to_floppy:
     ; I'm gonna make them give back our past.
     
     mov di, floppy_buffer
-    mov cx, [write_times]
     mov ax, 0x0
 
     repeated_write:
         mov si, buffer
 
+        mov cx, [write_times]
+    
         cmp cx, 0x0
         je to_floppy
         
         sub cx, 0x1
+        mov [write_times], cx
+    
         char_write:
-            add ax, 0x1
-            push cx
+            mov cx, 0x0
             mov cl, byte [si]
             mov byte [di], cl
-            pop cx
 
             add si, 0x1
             add di, 0x1
+            add ax, 0x1
 
             cmp byte [si], 0x0
             je repeated_write
@@ -218,56 +220,45 @@ write_to_floppy:
 
     to_floppy:
         mov dx, 0x0
-        mov ax, ax
-        mov cx, 0x100
+        mov cx, 0x200
         div cx
 
-        ; mov [temp_byte_ax], ax
-        mov [temp_byte_dx], dx
-
-        ; For some reason al is squared
-        
         cmp dx, 0x0
         je dx_zero
 
         add ax, 0x1
 
-        ; push ax
-        ; mov ah, 00h
-        ; int 16h
-        ; pop ax
-        
         dx_zero:
         ; Write to floppy
-            mov [temp_byte_ax], ax
-
             mov cx, ax
             mov ax, 0x0
-            mov al, 0x1
             mov bx, floppy_buffer
 
             write_loop:
                 push cx
                 mov ah, 03h
+                mov al, 0x1
                 mov dl, 0x0
                 mov cl, [track]
                 mov dh, [side]
                 mov ch, [sector]
                 int 13h
 
+                ; Check if it works without this
+                mov cl, [track]
+                mov dh, [side]
+                mov ch, [sector]
+
                 add cl, 0x1
-                cmp cl, 0x12
+                cmp cl, 0x13
                 jl write_continue
-                mov cl, 0x0
+                mov cl, 0x1
                 add dh, 0x1
 
-                cmp dh, 0x1
+                cmp dh, 0x2
                 jl write_continue
                 mov dh, 0x0
                 add ch, 0x1
-
-                cmp ch, 0x50
-                jge override_disk
 
                 write_continue:
                     mov [track], cl
@@ -277,21 +268,9 @@ write_to_floppy:
                 pop cx
                 
                 sub cx, 0x1
-                mov al, 0x1
-                
-                cmp bx, 0xFEFF
-                jl keep_es
-
-                push bx
-                mov bx, es
-                add bx, 0x1
-                mov es, bx
-                pop bx
-
-                keep_es:    
-                    add bx, 0x100
-                    cmp cl, 0x0
-                    jne write_loop
+                add bx, 0x200
+                cmp cx, 0x0
+                jne write_loop
 
     call clear_screen
 

@@ -1,3 +1,5 @@
+main:
+
 call write_names
 
 jmp menu

@@ -1,8 +1,6 @@
 menu:
     call clear_screen
 
-    call recalibrate_memory
-
     mov ax, 1301h
     mov bx, 0x7
     mov bp, main_message
@@ -40,15 +38,6 @@ unexpected_option:
     int 16h
 
     jmp menu
-
-recalibrate_memory:
-    mov ax, 0x7E00
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
-    mov sp, 0x7E00
-
-    ret
 
 section .data
     main_message db "Please select an option: ", 0xA, 0xD, "1. Keyboard to Floppy", 0xA, 0xD, "2. Floppy to RAM", 0xA, 0xD, "3. RAM to Floppy", 0xA, 0xD, 0xA, 0xD, "Your option: "
