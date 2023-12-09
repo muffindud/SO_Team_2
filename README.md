@@ -7,10 +7,6 @@
 
 ### Compilation Commands
 ```bash
-nasm -f bin -o boot.bin boot.asm && 
-nasm -f bin -o main.bin main.asm && 
-cat boot.bin main.bin > boot.img && 
-truncate -s 1474560 boot.img && 
-rm boot.bin main.bin
+nasm -f bin -o boot.img boot.asm && 
+truncate -s 1474560 boot.img
 ```
-
