@@ -82,6 +82,25 @@ print_sector_prompt:
 
     ret
 
+; Print sectors amount warning
+print_sectors_warning:
+    mov ah, 03h
+    int 10h
+
+    mov ax, 1301h
+    mov bx, 0x7
+    mov dl, 0x0
+    add dh, 0x1
+    mov bp, sectors_warning
+    mov cx, sectors_warning_size
+    int 10h
+
+    mov ah, 02h
+    sub dh, 0x1
+    int 10h
+
+    ret
+
 ; Print the times prompt
 print_times_prompt:
     mov ax, 1301h
@@ -191,6 +210,9 @@ section .data
     
     sectors_prompt db "Sectors: "
     sectors_prompt_size equ $ - sectors_prompt
+
+    sectors_warning db "Sectors must be in range 1-2880"
+    sectors_warning_size equ $ - sectors_warning
 
     volume_prompt db "Volume(bytes): "
     volume_prompt_size equ $ - volume_prompt
