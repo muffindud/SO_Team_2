@@ -1,3 +1,4 @@
+; Print the sectors prompt
 print_sectors_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -9,6 +10,7 @@ print_sectors_prompt:
     
     ret
 
+; Print the volume prompt
 print_volume_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -20,6 +22,7 @@ print_volume_prompt:
 
     ret
 
+; Print the text prompt
 print_text_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -31,6 +34,7 @@ print_text_prompt:
     
     ret
 
+; Print the buffer
 print_buffer:
     mov ax, 1301h
     mov bx, 0x7
@@ -42,6 +46,7 @@ print_buffer:
     
     ret
 
+; Print the side prompt
 print_side_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -53,6 +58,7 @@ print_side_prompt:
     
     ret
 
+; Print the track prompt
 print_track_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -64,6 +70,7 @@ print_track_prompt:
 
     ret
 
+; Print the sector prompt
 print_sector_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -75,6 +82,7 @@ print_sector_prompt:
 
     ret
 
+; Print the times prompt
 print_times_prompt:
     mov ax, 1301h
     mov bx, 0x7
@@ -86,6 +94,7 @@ print_times_prompt:
 
     ret
 
+; Print the times amount warning
 print_times_warning:
     mov ah, 03h
     int 10h
@@ -104,6 +113,7 @@ print_times_warning:
 
     ret
 
+; Print the side warning
 print_side_warning:
     mov ah, 03h
     int 10h
@@ -122,6 +132,7 @@ print_side_warning:
 
     ret
 
+; Print the track warning
 print_track_warning:
     mov ah, 03h
     int 10h
@@ -140,6 +151,7 @@ print_track_warning:
 
     ret
 
+; Print the sector warning
 print_sector_warning:
     mov ah, 03h
     int 10h
@@ -158,6 +170,7 @@ print_sector_warning:
 
     ret
 
+; Print the address prompt
 print_address_prompt:
     mov ax, 1301h
     mov bx, 0x7

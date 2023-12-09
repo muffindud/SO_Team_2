@@ -1,5 +1,7 @@
+; Clear the screen
 clear_screen:
     pusha
+    ; Clear the screen with INT 10h 07h
     mov ah, 07h
     mov al, 0x0
     mov bh, 0x7
@@ -7,6 +9,7 @@ clear_screen:
     mov dx, 0x184F
     int 10h
 
+    ; Move the cursor to the top left corner
     mov ah, 02h
     mov dx, 0x0
     int 10h
@@ -14,6 +17,7 @@ clear_screen:
     
     ret
 
+; Remove the last character from the screen
 remove_last_char:
     ; Move the cursor back
     mov ah, 02h
@@ -27,6 +31,7 @@ remove_last_char:
 
     ret
 
+; Remove the last char on previous line
 remove_last_char_line:
     ; Move the cursor to the end of the previous line
     mov ah, 02h
@@ -41,6 +46,7 @@ remove_last_char_line:
 
     ret
 
+; Clear the current line
 clear_row:
     mov ah, 03h
     int 10h 
@@ -54,6 +60,7 @@ clear_row:
 
     ret
 
+; Print the floppy error
 print_error:
     cmp ah, 00h
     je floppy_error_00
