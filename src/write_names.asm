@@ -2,64 +2,64 @@ write_names:
     ; Write sector 1
     ; to 2041
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x38
-    mov dh, 0x1
-    mov cl, 0x8
-    mov bx, sector_1
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x38        ; Track 56
+    mov dh, 0x1         ; Head 1
+    mov cl, 0x8         ; Sector 8
+    mov bx, sector_1    ; Buffer
     int 13h
 
     ; to 2070
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x39
-    mov dh, 0x1
-    mov cl, 0x1
-    mov bx, sector_1
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x39        ; Track 57
+    mov dh, 0x1         ; Head 1
+    mov cl, 0x1         ; Sector 1
+    mov bx, sector_1    ; Buffer
     int 13h
 
     ; Write sector 2
     ; to 2281
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x3F
-    mov dh, 0x0
-    mov cl, 0xE
-    mov bx, sector_2
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x3F        ; Track 63
+    mov dh, 0x0         ; Head 0
+    mov cl, 0xE         ; Sector 14
+    mov bx, sector_2    ; Buffer
     int 13h
 
     ; to 2310
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x40
-    mov dh, 0x0
-    mov cl, 0x7
-    mov bx, sector_2
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x40        ; Track 64
+    mov dh, 0x0         ; Head 0
+    mov cl, 0x7         ; Sector 7
+    mov bx, sector_2    ; Buffer
     int 13h
 
     ; Write sector 3
     ; to 2311
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x40
-    mov dh, 0x0
-    mov cl, 0x8
-    mov bx, sector_3
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x40        ; Track 64
+    mov dh, 0x0         ; Head 0
+    mov cl, 0x8         ; Sector 8
+    mov bx, sector_3    ; Buffer
     int 13h
 
     ; to 2340
     mov ah, 03h
-    mov dl, 0x0
-    mov al, 0x1
-    mov ch, 0x41
-    mov dh, 0x0
-    mov cl, 0x1
-    mov bx, sector_3
+    mov dl, 0x0         ; Drive 0
+    mov al, 0x1         ; Sector count 1
+    mov ch, 0x41        ; Track 65
+    mov dh, 0x0         ; Head 0
+    mov cl, 0x1         ; Sector 1
+    mov bx, sector_3    ; Buffer
     int 13h
 
     ret

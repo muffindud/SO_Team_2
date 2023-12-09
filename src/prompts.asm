@@ -1,15 +1,3 @@
-print_override_disk:
-    mov ax, 1301h
-    mov bx, 0x7
-    mov dl, 0x0
-    mov dh, 0x0
-    mov bp, override_disk_prompt
-    mov cx, override_disk_prompt_size
-    int 10h
-
-    ret
-
-
 print_sectors_prompt:
     mov ax, 1301h
     mov bx, 0x7

@@ -1,9 +1,12 @@
 main:
 
+; Call "wirte_names" from "write_names.asm"
 call write_names
 
+; Go to "menu" from "menu.asm"
 jmp menu
 
+; Include all the files
 %include "src/write_names.asm"
 
 %include "src/menu.asm"
@@ -16,6 +19,3 @@ jmp menu
 %include "src/ram_to_floppy.asm"
 
 %include "src/floppy_params.asm"
-
-; TODO: keyboard_to_floppy.asm
-; TODO: Add repetition times
